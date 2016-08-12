@@ -1,0 +1,21 @@
+Tones:
+
+Low: 349 Hz, F4
+Med: 554 Hz, C#5
+High: 880 Hz, A5
+
+See http://www.phy.mtu.edu/~suits/notefreqs.html
+
+Square wave tones generated at 0.8 amplitude in Audacity
+
+
+Noise burst:
+
+20ms white noise, 20ms silence, 20s white noise, 20ms silence, 20ms white noise
+
+Noise generated at 0.8 amplitude in Audacity
+
+
+With computer volume at 75, noises are approx 73 dbA and tones are approx 65 dbA
+
+But volume level 60 sounds better...
