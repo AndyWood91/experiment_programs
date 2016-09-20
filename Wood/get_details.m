@@ -3,20 +3,17 @@
 % identifying information (age, gender, hand) are stored separately from
 % experiment information for anonymity.
 
+% TODO: turn inputs into a class and make validation a method.
+
 
 %% code
 
 function [DATA] = get_details(title, conditions, sessions, bonus)
 
-
     % variable declarations
-    global testing;
-    
-    testing = 1;  % test version
-%     testing = 0;  % experimental version
-    
-    start = datestr(now, 0);
-    
+    start = datestr(now, 0);  % get current time
+%     global testing;  % turn on if debugging within another script
+    testing = 1;  % 0 = experimental version, 1 = test version, turn off if debugging within another script
     
     % set missing inputs
     if nargin <4
@@ -42,7 +39,6 @@ function [DATA] = get_details(title, conditions, sessions, bonus)
     else
         % user input
     end
-    
     
     % check input types
     if ~isa(bonus, 'logical')
@@ -75,20 +71,17 @@ function [DATA] = get_details(title, conditions, sessions, bonus)
         % is char
     end
     
-    
     % data check loop
     while true
         
         commandwindow;  % move curor to command window
         
         while true  % number loop
-            
             try
                 number = input('Participant number --> ', 's');  % stored as a string to stop Matlab from attempting to execute expressions
             catch
                 % do nothing with errors, number loop will repeat
             end
-            
             
             % validation
             if str2double(number) > 0  % only accept positive integers
@@ -96,14 +89,10 @@ function [DATA] = get_details(title, conditions, sessions, bonus)
             else
                 % do nothing, number loop will repeat
             end
-            
         end  % number loop
         
-        
         if sessions > 1  % more than 1 experimental session
-        
             while true  % session loop
-
                 try
                     session = input('Session number --> ', 's');  % stored as a string to stop Matlab from attempting to execute expressions
                 catch
@@ -116,21 +105,14 @@ function [DATA] = get_details(title, conditions, sessions, bonus)
                 else
                     % do nothing, session loop will repeat
                 end
-                
             end  % session loop
-            
         else  % 1 experimental session
-            
             session = '1';
-            
         end  % if sessions
         
-
         % filenames
         participant_filename = ['participant_details/participant', number, '.mat'];
-%         DATA.participant.filename = participant_filename;  % store participant filename
         experiment_filename = ['raw_data/participant', number, 'session'];  % doesn't include session number yet to make it easier to check for previous session's data
-        
         
         % directories
         if exist('participant_details', 'dir') ~=7  % if participant_details directory doesn't exist
@@ -147,27 +129,19 @@ function [DATA] = get_details(title, conditions, sessions, bonus)
         
         % session data
         if exist([experiment_filename, session, '.mat'], 'file') == 2  % check for existing data file
-            
             clc;
             data_exists = 'Session %c data already exists for participant %c.\n\n';
             fprintf(data_exists, session, number);
             % data check loop will repeat
-            
         else  % no existing data file
-            
             if str2double(session) == 1  % first session
-                
                 if testing == 1  % test version
-                    
                     % it me 
                     age = '25';
                     gender = 'man';
                     hand = 'right';
-                    
                 elseif testing == 0  % experimental version
-                    
                     while true  % age loop
-                        
                         try
                             age = input('Participant age --> ', 's');  % stored as a string to stop Matlab from attempting to execute expressions
                         catch
@@ -180,12 +154,9 @@ function [DATA] = get_details(title, conditions, sessions, bonus)
                         else
                             % do nothing, age loop will repeat
                         end
-                        
                     end  % age loop
                     
-                    
                     while true  % gender loop
-                        
                         try
                             gender = input('Participant gender (use first letter): man/other/woman --> ', 's');  % stored as a string to stop Matlab from attempting to execute expressions
                         catch
@@ -205,12 +176,9 @@ function [DATA] = get_details(title, conditions, sessions, bonus)
                         else
                             % do nothing, gender lop will repeat
                         end
-                        
                     end  % gender loop
                     
-                    
                     while true  % hand loop
-                        
                         try
                             hand = input('Participant hand (use first letter): ambidextrous/left/right --> ', 's');  % stored as a string to stop Matlab from attempting to execute expressions
                         catch
@@ -230,9 +198,7 @@ function [DATA] = get_details(title, conditions, sessions, bonus)
                         else
                             % do nothing, hand loop will repeat
                         end
-                        
                     end  % hand loop
-                
                     
                 else
                     error('variable "testing" isn''t set properly');
@@ -248,22 +214,17 @@ function [DATA] = get_details(title, conditions, sessions, bonus)
                 save(participant_filename, 'DATA');
                 clear DATA;
 
-
                 % store experiment data
                 experiment_filename = [experiment_filename, session, '.mat'];
                 DATA.experiment.number = number;
                 DATA.experiment.session = session;
                 DATA.experiment.filename = experiment_filename;
                 DATA.experiment.start = start;
-                DATA.experiment.title = title;  % what does this do with no title?
-
+                DATA.experiment.title = title;
 
                 % set counterbalance values
                 if numel(conditions) > 0
-
-                    % blank array to store values
-                    counterbalance = zeros(1, numel(conditions));
-
+                    counterbalance = zeros(1, numel(conditions));  % blank array to store values
                     % for each condition, number is divided by the number
                     % of possible values for that condition. Then add 1 to
                     % shift floor value up to 1 (would otherwise be 0 if
@@ -276,11 +237,9 @@ function [DATA] = get_details(title, conditions, sessions, bonus)
                     end
 
                     DATA.experiment.counterbalance = counterbalance;
-
                 else
                     % no conditions
                 end  % if counterbalance
-
 
                 if bonus 
                     bonus_session = 0;
@@ -294,27 +253,19 @@ function [DATA] = get_details(title, conditions, sessions, bonus)
                 break  % exit the data check loop
                 
             elseif str2double(session) > 1  % not the first session
-                
-                previous_session = num2str(str2double(session) - 1);
+                previous_session = num2str(str2double(session) - 1);  % previous session number as char
                 
                 if exist([experiment_filename, previous_session, '.mat'], 'file') ~= 2
-                    
                     clc;
                     data_missing = 'Session %c data does not exist for participant %c.\n\n';
                     fprintf(data_missing, previous_session, number);
                     % data check loop will repeat
-                    
                 else
-                    
                     load([experiment_filename, previous_session, '.mat'], 'DATA');
-                    
                     % TODO: load and display previous data
-                    
                 end
                 
-                
                 while true  % confirm loop
-                    
                     try
                         confirm = input('Are these details correct (use first letter): yes/no --> ', 's');  % stored as a string to stop Matlab from attempting to execute expressions
                     catch
@@ -332,6 +283,7 @@ function [DATA] = get_details(title, conditions, sessions, bonus)
                 
                 % TODO: no doesn't repeat the loop for some reason
                 if strcmpi(confirm, 'y')
+                    % TODO: save data here
                     break  % exit data check loop
                 elseif strcmpi(confirm, 'n')
                     % do nothing, data check loop will repeat
@@ -339,9 +291,9 @@ function [DATA] = get_details(title, conditions, sessions, bonus)
                 
             end  % if session
         
-        break  % exit data  check loop
-        
-    end  % data check loop
+        end  % data check loop
+    
+    end  % exit data check loop
     
 end  % get_details
 
